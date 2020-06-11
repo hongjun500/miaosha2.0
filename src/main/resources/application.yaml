@@ -1,0 +1,6 @@
+server:
+  port: 8090
+
+#mapper隐射文件
+mybatis:
+  mapper-locations: classpath:mapping/*.xml
