@@ -59,6 +59,14 @@
       <artifactId>spring-boot-starter-aop</artifactId>
     </dependency>
 
+    <!--引入thymeleaf-->
+    <dependency>
+      <groupId>org.springframework.boot</groupId>
+      <artifactId>spring-boot-starter-thymeleaf</artifactId>
+      <version>2.3.0.RELEASE</version>
+    </dependency>
+
+
     <dependency>
       <groupId>junit</groupId>
       <artifactId>junit</artifactId>

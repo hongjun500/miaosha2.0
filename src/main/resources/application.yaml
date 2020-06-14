@@ -4,6 +4,7 @@ server:
 mybatis:
   mapper-locations: classpath:mapping/*.xml
 spring:
+  #数据源
   datasource:
     name: miaosha2.0
     url: jdbc:mysql://localhost:3306/miaosha2.0?serverTimezone=UTC
@@ -11,3 +12,11 @@ spring:
     password: hongjun500
     type: com.alibaba.druid.pool.DruidDataSource
     driver-class-name: com.mysql.jdbc.Driver
+  #引入thymeleaf
+  thymeleaf:
+    cache: false
+    check-template-location: true
+    #此处可不做处理，springboot有其默认配置
+    prefix: classpath:/templates/
+    suffix: .html
+
