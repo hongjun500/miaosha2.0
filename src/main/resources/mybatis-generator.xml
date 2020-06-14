@@ -26,11 +26,11 @@
                enableUpdateByExample="false" enableDeleteByExample="false"
                enableSelectByExample="false" selectByExampleQueryId="false">
         </table>
-        <!--不指定为false会有对应的以Example结尾的类名生成-->
-        <table tableName="user_password" domainObjectName="UserPasswordDO"
+        <!--不指定为false会有对应的以Example结尾的类名生成以mapper文件里一些复杂查询sql语句-->
+        <!--<table tableName="user_password" domainObjectName="UserPasswordDO"
                enableUpdateByExample="false" enableDeleteByExample="false"
                enableSelectByExample="false" selectByExampleQueryId="false">
-        </table>
+        </table>-->
 
     </context>
 </generatorConfiguration>

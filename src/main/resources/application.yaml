@@ -1,6 +1,13 @@
 server:
   port: 8090
-
-#mapper隐射文件
+#mapper映射文件位置
 mybatis:
   mapper-locations: classpath:mapping/*.xml
+spring:
+  datasource:
+    name: miaosha2.0
+    url: jdbc:mysql://localhost:3306/miaosha2.0?serverTimezone=UTC
+    username: root
+    password: hongjun500
+    type: com.alibaba.druid.pool.DruidDataSource
+    driver-class-name: com.mysql.jdbc.Driver
