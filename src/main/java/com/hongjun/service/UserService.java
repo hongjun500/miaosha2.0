@@ -1,5 +1,6 @@
 package com.hongjun.service;
 
+import com.hongjun.error.BusinessException;
 import com.hongjun.service.model.UserModel;
 
 /**
@@ -14,4 +15,11 @@ public interface UserService {
      * @param id
      */
     UserModel getUserById(Integer id);
+
+    /**
+     * 用户注册
+     * @param userModel
+     * @return
+     */
+    void register(UserModel userModel) throws BusinessException;
 }

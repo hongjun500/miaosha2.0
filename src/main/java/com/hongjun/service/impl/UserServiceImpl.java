@@ -4,11 +4,16 @@ import com.hongjun.dao.UserDOMapper;
 import com.hongjun.dao.UserPasswordDOMapper;
 import com.hongjun.dataobject.UserDO;
 import com.hongjun.dataobject.UserPasswordDO;
+import com.hongjun.error.BusinessException;
+import com.hongjun.error.EmBusinessError;
 import com.hongjun.service.UserService;
 import com.hongjun.service.model.UserModel;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.dao.DuplicateKeyException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * @author hongjun500
@@ -35,10 +40,74 @@ public class UserServiceImpl implements UserService {
         }
         // 通过用户id获取对应用户的加密密码
         UserPasswordDO userPasswordDO = userPasswordDOMapper.selectByUserId(userDO.getId());
-        return convertFromUserModel(userDO, userPasswordDO);
+        return convertUserModelFromUserDO(userDO, userPasswordDO);
     }
 
-    private UserModel convertFromUserModel(UserDO userDO, UserPasswordDO userPasswordDO){
+    @Override
+    @Transactional
+    public void register(UserModel userModel) throws BusinessException {
+        if (userModel == null){
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
+        }
+        // 字段判空
+        if (StringUtils.isEmpty(userModel.getName()) || userModel.getAge() == null || userModel.getGender() == null || StringUtils.isEmpty(userModel.getTelphone())){
+            // 内部处理空串
+            /*public static boolean isEmpty(CharSequence cs) {
+                return cs == null || cs.length() == 0;
+            }
+
+            public static boolean isNotEmpty(CharSequence cs) {
+                return !isEmpty(cs);
+            }*/
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
+        }
+        // 实现model ---> dataobject的方法
+        UserDO userDO = new UserDO();
+        userDO = convertUserDOFromUserModel(userModel);
+        // insertSelective对应的mybatis-mapper.xml里面sql语句的处理方式是：判断对应的字段在dataobject里面是否为null,如果不为null则执行insert操作，反之则跳过不执行insert操作--->依赖数据库，使用数据库中的默认值
+        try {
+            userDOMapper.insertSelective(userDO);
+        }catch (DuplicateKeyException e){
+            // 手机号重复
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR,"手机号已注册!");
+        }
+        userModel.setId(userDO.getId());
+
+        // 如果使用这种方式的话，当某个字段值为null的时候，执行insert时就会用null覆盖对应的默认值！！！
+        // userDOMapper.insert(null);
+
+        // 笔记--->  null不受唯一索引约束
+
+        UserPasswordDO userPasswordDO = convertUserPasswordDOFromUserModel(userModel);
+        userPasswordDOMapper.insertSelective(userPasswordDO);
+        // 此处的两个操作是在同一个事务下，须在方法上加上Transactional
+        /*userDOMapper.insertSelective(userDO);
+        userPasswordDOMapper.insertSelective(userPasswordDO);*/
+    }
+
+    private UserDO convertUserDOFromUserModel(UserModel userModel){
+        if (userModel == null){
+            return null;
+        }
+        UserDO userDO = new UserDO();
+        // 把传递进来的userModel转变成userDO,对数据库写操作
+        BeanUtils.copyProperties(userModel, userDO);
+        return userDO;
+    }
+
+    private UserPasswordDO convertUserPasswordDOFromUserModel(UserModel userModel){
+        if (userModel == null){
+            return null;
+        }
+        UserPasswordDO userPasswordDO = new UserPasswordDO();
+        // 把传递进来的userModel转变成userDO,对数据库写操作
+        userPasswordDO.setEncrptPassword(userModel.getEncrptPassword());
+        userPasswordDO.setUserId(userModel.getId());
+        return userPasswordDO;
+    }
+
+
+    private UserModel convertUserModelFromUserDO(UserDO userDO, UserPasswordDO userPasswordDO){
        if (userDO==null){
             return null;
        }
