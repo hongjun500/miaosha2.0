@@ -93,7 +93,7 @@
             $.ajax({
                 type:"POST",
                 contentType:"application/x-www-form-urlencoded",
-                url:"http://localhost:8090/user/register",
+                url:"/user/register",
                 data:{
                     "telphone":telphone,
                     "otpCode":otpCode,
@@ -108,7 +108,7 @@
                 success:function (data) {
                     if(data.status=="success"){
                         alert("注册成功");
-                        // window.location.href="login.html";
+                        window.location.href="/loginView";
                     }else{
                         alert("注册失败，原因为"+data.data.errMsg);
                     }

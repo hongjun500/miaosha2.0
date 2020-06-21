@@ -19,4 +19,3 @@ spring:
     #此处可不做处理，springboot有其默认配置
     prefix: classpath:/templates/
     suffix: .html
-

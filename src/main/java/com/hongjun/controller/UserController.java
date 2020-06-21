@@ -7,7 +7,6 @@ import com.hongjun.error.EmBusinessError;
 import com.hongjun.response.CommonReturnType;
 import com.hongjun.service.UserService;
 import com.hongjun.service.model.UserModel;
-import org.apache.tomcat.util.security.MD5Encoder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
@@ -15,8 +14,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 import sun.misc.BASE64Encoder;
-import sun.security.krb5.internal.PAData;
-
 import javax.servlet.http.HttpServletRequest;
 import java.io.UnsupportedEncodingException;
 import java.security.MessageDigest;
@@ -33,7 +30,7 @@ import java.util.Random;
 @RequestMapping("/user")
 // 实现跨域请求，(此处引入了thymeleaf，加入到了项目里面以请求的方式访问(页面)，不做处理也行的通，但是如果前后端分离则需要用到）
 @CrossOrigin
-public class UserController extends BaseController{
+public class UserController extends BaseController {
 
     public static final Logger logger = LoggerFactory.getLogger(UserController.class);
 
@@ -49,24 +46,32 @@ public class UserController extends BaseController{
 
     /**
      * 获取短信页面
+     *
      * @return
      */
     @GetMapping(value = "/otpView")
-    public String otpView(){
+    public String otpView() {
         return "getOtp";
     }
 
     /**
      * 注册页面
+     *
      * @return
      */
     @GetMapping(value = "/registerView")
-    public String registerView(){
+    public String registerView() {
         return "register";
+    }
+
+    @GetMapping(value = "/loginView")
+    public String loginView() {
+        return "login";
     }
 
     /**
      * 注册接口
+     *
      * @return
      */
     @PostMapping(value = "/register")
@@ -81,7 +86,7 @@ public class UserController extends BaseController{
         // 从session中获取键为telphone的值 对应91，92行
         String inSessionOtpCode = String.valueOf(request.getSession().getAttribute(telphone));
         // 比较用户输入的otpCode和之前通过手机号发送绑定的存储在session中的otpCode
-        if (!StringUtils.equals(otpCode, inSessionOtpCode)){
+        if (!StringUtils.equals(otpCode, inSessionOtpCode)) {
             // 这里的比较是使用alibaba-druid类库，里面做了判空,内部实现如下
             /*public static boolean equals(String a, String b) {
                 if (a == null) {
@@ -90,7 +95,7 @@ public class UserController extends BaseController{
                     return a.equals(b);
                 }
             }*/
-           throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR,"短信验证码不符合");
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "短信验证码不符合");
 
         }
 
@@ -109,15 +114,14 @@ public class UserController extends BaseController{
 
     public String enCodeByMd5(String str) throws NoSuchAlgorithmException, UnsupportedEncodingException {
         //确定一个计算方法
-        MessageDigest md5=MessageDigest.getInstance("MD5");
-        BASE64Encoder base64Encoder=new BASE64Encoder();
+        MessageDigest md5 = MessageDigest.getInstance("MD5");
+        BASE64Encoder base64Encoder = new BASE64Encoder();
         //加密字符串
-        String pwd= base64Encoder.encode(md5.digest(str.getBytes("UTF-8")));
+        String pwd = base64Encoder.encode(md5.digest(str.getBytes("UTF-8")));
         return pwd;
     }
 
     /**
-     * 这种方式可以解密出来
      * @param source
      * @return
      */
@@ -144,7 +148,7 @@ public class UserController extends BaseController{
 
     @PostMapping(value = "/getOtp")
     @ResponseBody
-    public CommonReturnType getOtp(@RequestParam(name = "telphone") String telphone){
+    public CommonReturnType getOtp(@RequestParam(name = "telphone") String telphone) {
         // 按照一定的规则生成otp验证码
         Random random = new Random();
 
@@ -173,7 +177,7 @@ public class UserController extends BaseController{
         UserModel userModel = userService.getUserById(id);
 
         // 若对象不存在
-        if (userModel == null){
+        if (userModel == null) {
             // userModel.setEncrptPassword("fdfdsfsd");
             throw new BusinessException(EmBusinessError.USER_NOT_EXIST);
         }
@@ -184,12 +188,35 @@ public class UserController extends BaseController{
         return CommonReturnType.create(userVO);
     }
 
-    private UserVO convertFromModel(UserModel userModel){
-        if (userModel == null){
+    private UserVO convertFromModel(UserModel userModel) {
+        if (userModel == null) {
             return null;
         }
         UserVO userVO = new UserVO();
         BeanUtils.copyProperties(userModel, userVO);
         return userVO;
+    }
+
+    /**
+     * 登录接口
+     *
+     * @param telphone
+     * @param password
+     */
+    @PostMapping(value = "/login")
+    @ResponseBody
+    public CommonReturnType login(@RequestParam(name = "telphone") String telphone,
+                                     @RequestParam(name = "password") String password) throws BusinessException, UnsupportedEncodingException, NoSuchAlgorithmException {
+        if (StringUtils.isEmpty(telphone) || StringUtils.isEmpty(password)){
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
+        }
+        UserModel userModel = userService.validateLogin(telphone, this.enCodeByMd5(password));
+        // 将登录凭证加入到用户登录成功的session内
+        // 成功标识
+        request.getSession().setAttribute("IS_LOGIN", true);
+        request.getSession().setAttribute("LOGIN_USER", userModel);
+        UserModel login_user = (UserModel) request.getSession().getAttribute("LOGIN_USER");
+        logger.info("用户手机：{},用户名：{},用户年龄：{},用户ID：{}",login_user.getTelphone(),login_user.getName(),login_user.getGender(),login_user.getId());
+        return CommonReturnType.create(null);
     }
 }
