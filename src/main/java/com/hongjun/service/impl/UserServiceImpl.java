@@ -8,6 +8,8 @@ import com.hongjun.error.BusinessException;
 import com.hongjun.error.EmBusinessError;
 import com.hongjun.service.UserService;
 import com.hongjun.service.model.UserModel;
+import com.hongjun.validator.ValidationResult;
+import com.hongjun.validator.ValidatorImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -30,6 +32,9 @@ public class UserServiceImpl implements UserService {
     @Autowired
     private UserPasswordDOMapper userPasswordDOMapper;
 
+    @Autowired
+    private ValidatorImpl validator;
+
     @Override
     public UserModel getUserById(Integer id) {
         // 调用对应的userDOMapper获取对应用户dataobject
@@ -50,17 +55,22 @@ public class UserServiceImpl implements UserService {
             throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
         }
         // 字段判空
-        if (StringUtils.isEmpty(userModel.getName()) || userModel.getAge() == null || userModel.getGender() == null || StringUtils.isEmpty(userModel.getTelphone())){
-            // 内部处理空串
-            /*public static boolean isEmpty(CharSequence cs) {
-                return cs == null || cs.length() == 0;
-            }
-
-            public static boolean isNotEmpty(CharSequence cs) {
-                return !isEmpty(cs);
-            }*/
-            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
+        // if (StringUtils.isEmpty(userModel.getName()) || userModel.getAge() == null || userModel.getGender() == null || StringUtils.isEmpty(userModel.getTelphone())){
+        //     // 内部处理空串
+        //     /*public static boolean isEmpty(CharSequence cs) {
+        //         return cs == null || cs.length() == 0;
+        //     }
+        //
+        //     public static boolean isNotEmpty(CharSequence cs) {
+        //         return !isEmpty(cs);
+        //     }*/
+        //     throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR);
+        // }
+        ValidationResult result = validator.validate(userModel);
+        if (result.getHasErrors()){
+            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, result.getErrorMsg());
         }
+
         // 实现model ---> dataobject的方法
         UserDO userDO = new UserDO();
         userDO = convertUserDOFromUserModel(userModel);
