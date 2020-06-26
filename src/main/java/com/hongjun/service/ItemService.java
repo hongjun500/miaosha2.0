@@ -26,4 +26,12 @@ public interface ItemService {
      * 商品详情浏览
      */
     ItemModel getItemById(Integer id);
+
+    /**
+     * 库存扣减
+     * @param itemId 商品id
+     * @param amount 购买数量
+     * @return
+     */
+    boolean decreaseStock(Integer itemId, Integer amount);
 }
