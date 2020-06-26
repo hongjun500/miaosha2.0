@@ -20,6 +20,7 @@ import sun.awt.AWTAccessor;
 import java.math.BigDecimal;
 import java.nio.BufferOverflowException;
 import java.util.List;
+import java.util.stream.Collectors;
 
 /**
  * @author hongjun500
@@ -90,7 +91,13 @@ public class ItemServiceImpl implements ItemService {
 
     @Override
     public List<ItemModel> listItem() {
-        return null;
+        List<ItemDO> itemDOList = itemDOMapper.listItem();
+        List<ItemModel> itemModelList = itemDOList.stream().map(itemDO -> {
+            ItemStockDO itemStockDO = itemStockDOMapper.selectByItemId(itemDO.getId());
+            ItemModel itemModel = convertModelFromDataObject(itemDO, itemStockDO);
+            return itemModel;
+        }).collect(Collectors.toList());
+        return itemModelList;
     }
 
     @Override
@@ -111,7 +118,7 @@ public class ItemServiceImpl implements ItemService {
         ItemModel itemModel = new ItemModel();
         BeanUtils.copyProperties(itemDO, itemModel);
         itemModel.setPrice(BigDecimal.valueOf(itemDO.getPrice()));
-        itemModel.setSales(itemStockDO.getStock());
+        itemModel.setStock(itemStockDO.getStock());
 
         return itemModel;
     }
