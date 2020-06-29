@@ -83,7 +83,8 @@ public class OrderServiceImpl implements OrderService {
         OrderDO orderDO = this.convertOrderDOFromOrderModel(orderModel);
         orderDOMapper.insertSelective(orderDO);
         // 4.返回前端
-        return null;
+        itemService.increaseSales(itemId, amount);
+        return orderModel;
     }
 
     public static void main(String[] args) {

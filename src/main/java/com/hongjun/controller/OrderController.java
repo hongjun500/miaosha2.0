@@ -43,7 +43,7 @@ public class OrderController extends BaseController {
         // 获取用户登录信息 小布尔可能会出现空指针异常
         Boolean isLogin = (Boolean) httpServletRequest.getSession().getAttribute("IS_LOGIN");
         if (isLogin == null || !isLogin){
-            throw new BusinessException(EmBusinessError.PARAMETER_VALIDATION_ERROR, "用户未登录!");
+            throw new BusinessException(EmBusinessError.USER_NOT_LOGIN,"用户未登录,不能下单");
         }
         UserModel userModel = (UserModel) httpServletRequest.getSession().getAttribute("LOGIN_USER");
         OrderModel orderModel = orderService.createOrder(userModel.getId(), itemId, amount);

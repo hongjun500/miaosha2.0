@@ -136,4 +136,10 @@ public class ItemServiceImpl implements ItemService {
             return false;
         }
     }
+
+    @Override
+    @Transactional
+    public void increaseSales(Integer itemId, Integer amount) {
+        itemDOMapper.increaseSales(itemId, amount);
+    }
 }

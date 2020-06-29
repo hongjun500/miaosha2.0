@@ -34,4 +34,11 @@ public interface ItemService {
      * @return
      */
     boolean decreaseStock(Integer itemId, Integer amount);
+
+    /**
+     * 销量增加
+     * @param itemId 商品id
+     * @param amount 购买数量
+     */
+    void increaseSales(Integer itemId, Integer amount);
 }

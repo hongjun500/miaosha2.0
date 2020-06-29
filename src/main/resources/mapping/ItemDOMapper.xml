@@ -159,7 +159,7 @@
   <update id="increaseSales" parameterType="com.hongjun.dataobject.ItemDO">
     update item
     set
-    sales =sales + #{amount}
+    sales = sales + #{amount}
     where id = #{id,jdbcType=INTEGER}
   </update>
 </mapper>
