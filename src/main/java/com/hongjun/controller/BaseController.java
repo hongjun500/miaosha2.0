@@ -21,13 +21,12 @@ import java.util.Map;
 public class BaseController {
     /**
      * 定义exceptionHandler解决未被controller层吸收的exception
-     * @param request
-     * @return
+     * @return obj
      */
     @ExceptionHandler(Exception.class)
     @ResponseStatus(HttpStatus.OK)
     @ResponseBody
-    public Object handlerException(HttpServletRequest request, Exception e){
+    public Object handlerException(Exception e){
         Map<String, Object> responseData = new HashMap<>();
         if (e instanceof BusinessException){
             BusinessException businessException = (BusinessException) e;
